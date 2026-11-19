@@ -35,6 +35,8 @@ All mutations are client-side and reset on refresh. This is intentionally a prot
 ## Completed improvements
 
 - Analytics and Settings are included in dashboard navigation.
+- Candidates can be added through a frontend modal using fictional session state.
+- Campaign cards can open a frontend detail view.
 - Candidate detail routes include profile, evidence, experience, notes, sources, achievements, and outreach history.
 - Pipeline stages include Interview, Selected, Rejected, and Archived.
 - Campaign creation captures organization, position, target universities, qualifications, description, and status.
@@ -44,7 +46,7 @@ All mutations are client-side and reset on refresh. This is intentionally a prot
 ## Remaining frontend limitations
 
 - Search and settings do not persist between refreshes.
-- Campaign detail pages and candidate profile editing are not yet implemented.
+- Campaign detail persistence and candidate profile editing are not yet implemented.
 - Analytics charts use static illustrative arrays.
 - There is no login or account authorization.
 - The “Add candidate” and “View campaign” controls remain prototypes until backend workflows are defined.
