@@ -6,7 +6,30 @@ export type CandidateStatus =
   | "Responded"
   | "Interested"
   | "Application"
+  | "Interview"
+  | "Selected"
+  | "Rejected"
+  | "Archived"
   | "Chapter Launched";
+export interface CandidateExperience {
+  title: string;
+  organization: string;
+  period: string;
+  summary: string;
+}
+
+export interface CandidateSource {
+  label: string;
+  type: "Profile" | "Public event" | "Application" | "Referral";
+  evidence: string;
+}
+
+export interface CandidateNote {
+  id: number;
+  author: string;
+  text: string;
+  createdAt: string;
+}
 
 export interface Candidate {
   id: number;
@@ -19,6 +42,14 @@ export interface Candidate {
   status: CandidateStatus;
   match: number;
   location: string;
+  program?: string;
+  graduationYear?: number;
+  campaignId?: number;
+  reviewStatus?: "Pending" | "Approved" | "Needs review";
+  achievements?: string[];
+  experience?: CandidateExperience[];
+  sources?: CandidateSource[];
+  notes?: CandidateNote[];
 }
 
 export interface Campaign {
@@ -29,6 +60,12 @@ export interface Campaign {
   contacted: number;
   responseRate: number;
   startDate: string;
+  organization?: string;
+  position?: string;
+  targetUniversities?: string[];
+  targetQualifications?: string[];
+  description?: string;
+  creationDate?: string;
 }
 
 export const candidates: Candidate[] = [
@@ -43,10 +80,10 @@ export const candidates: Candidate[] = [
 ];
 
 export const initialCampaigns: Campaign[] = [
-  { id: 1, name: "Youth leadership — GTA", status: "Active", candidates: 86, contacted: 62, responseRate: 38, startDate: "Nov 4, 2026" },
-  { id: 2, name: "University ambassadors", status: "Active", candidates: 64, contacted: 48, responseRate: 31, startDate: "Oct 21, 2026" },
-  { id: 3, name: "Community mentor network", status: "Draft", candidates: 35, contacted: 0, responseRate: 0, startDate: "Nov 18, 2026" },
-  { id: 4, name: "Fall chapter founders", status: "Completed", candidates: 42, contacted: 42, responseRate: 44, startDate: "Sep 8, 2026" }
+  { id: 1, name: "Youth leadership — GTA", organization: "Bright Beginnings Canada", position: "University Chapter Founder", targetUniversities: ["University of Toronto", "TMU", "York University"], targetQualifications: ["Student leadership", "Youth programs"], description: "Recruit student leaders to establish GTA university chapters.", status: "Active", candidates: 86, contacted: 62, responseRate: 38, startDate: "Nov 4, 2026", creationDate: "Nov 2, 2026" },
+  { id: 2, name: "University ambassadors", organization: "Bright Beginnings Canada", position: "Campus Ambassador", targetUniversities: ["George Brown College", "Centennial College"], targetQualifications: ["Community outreach", "Peer engagement"], description: "Build an ambassador network for campus awareness and outreach.", status: "Active", candidates: 64, contacted: 48, responseRate: 31, startDate: "Oct 21, 2026", creationDate: "Oct 19, 2026" },
+  { id: 3, name: "Community mentor network", organization: "Bright Beginnings Canada", position: "Community Mentor", targetUniversities: ["McMaster University", "Centennial College"], targetQualifications: ["Mentoring", "Early childhood interest"], description: "Identify mentors for family education and youth programming.", status: "Draft", candidates: 35, contacted: 0, responseRate: 0, startDate: "Nov 18, 2026", creationDate: "Nov 18, 2026" },
+  { id: 4, name: "Fall chapter founders", organization: "Bright Beginnings Canada", position: "Chapter Founder", targetUniversities: ["Western University", "Toronto Metropolitan University"], targetQualifications: ["Team building", "Operations"], description: "Support the launch of a fall chapter founder cohort.", status: "Completed", candidates: 42, contacted: 42, responseRate: 44, startDate: "Sep 8, 2026", creationDate: "Sep 5, 2026" }
 ];
 
 export const pipelineStages: CandidateStatus[] = [
@@ -57,7 +94,37 @@ export const pipelineStages: CandidateStatus[] = [
   "Responded",
   "Interested",
   "Application",
+  "Interview",
+  "Selected",
+  "Rejected",
+  "Archived",
   "Chapter Launched"
+];
+
+export interface Organization {
+  id: number;
+  name: string;
+  region: string;
+  website?: string;
+}
+
+export interface OutreachMessage {
+  id: number;
+  candidateId: number;
+  campaignId: number;
+  subject: string;
+  sentAt: string;
+  status: "Draft" | "Sent" | "Opened" | "Responded";
+}
+
+export const organizations: Organization[] = [
+  { id: 1, name: "Bright Beginnings Canada", region: "Canada", website: "https://example.org" }
+];
+
+export const outreachMessages: OutreachMessage[] = [
+  { id: 1, candidateId: 1, campaignId: 1, subject: "Chapter leadership opportunity", sentAt: "Nov 18, 2026", status: "Responded" },
+  { id: 2, candidateId: 2, campaignId: 1, subject: "Community leadership at Bright Beginnings", sentAt: "Nov 17, 2026", status: "Opened" },
+  { id: 3, candidateId: 5, campaignId: 2, subject: "Campus ambassador opportunity", sentAt: "Nov 16, 2026", status: "Responded" }
 ];
 
 export const recentActivity = [

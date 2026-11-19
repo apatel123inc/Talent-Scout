@@ -1,56 +1,86 @@
-# Project: AI Candidate Discovery Platform
+# PROJECT_RULES.md — Talent Scout Development Rulebook
 
-## Objective
-Build a professional AI-assisted candidate discovery,
-evaluation and recruitment platform.
+## Learning and workflow
 
-## First Customer
-Bright Beginnings Canada.
+- Explain unfamiliar concepts before using them.
+- Work on one feature or phase at a time.
+- Provide an implementation plan before major changes.
+- Explain important modified files and how the frontend, backend, and database communicate.
+- Never delete or overwrite existing work without approval.
+- Explain errors and validation failures honestly.
+- Write tests for important pure behavior and workflows where the project supports them.
 
-## Long-Term Objective
-Turn the platform into a subscription-based SaaS
-for nonprofits and other organizations.
+## Technology standards
 
-## Technology
-- Next.js
-- TypeScript
-- Tailwind CSS
-- Git
-- SQLite initially
-- Supabase later
+- Next.js App Router
+- React client components only when state or browser APIs are needed
+- Strict TypeScript with explicit domain interfaces
+- Tailwind CSS for styling
+- ESLint before completion
+- PostgreSQL or Supabase as the future persistent database
+- No paid or unnecessary services during initial frontend development
 
-## My Learning Requirements
+## File organization
 
-I am learning software development while building this.
+- `src/app` contains routes and route-level composition.
+- `src/components` contains reusable UI components.
+- `src/data` contains typed mock/domain data.
+- Future `src/lib` contains framework-independent helpers and data access abstractions.
+- Future `src/app/api` contains server API endpoints only after persistence is implemented.
+- Do not put large datasets or unrelated domain logic into route components.
 
-You are my coding tutor and implementation assistant.
+## React and TypeScript
 
-1. Explain concepts before using unfamiliar technology.
-2. Work on one feature at a time.
-3. Give me an implementation plan before major changes.
-4. Explain every important file you modify.
-5. Never change large sections of the application
-   without my approval.
-6. Explain errors instead of hiding them.
-7. Write tests for important features.
-8. Explain how the frontend communicates with
-   the backend and database.
+- Prefer small, reusable components.
+- Use discriminated status unions where useful.
+- Treat event types and form values explicitly.
+- Keep derived state in `useMemo` instead of duplicating state when appropriate.
+- Do not use `any` unless absolutely necessary and documented.
+- Keep client components isolated to interactive leaves where possible.
 
-## Product Requirements
+## UI and accessibility
 
-- Candidate database
-- Recruitment campaigns
-- Evidence-based AI evaluation
-- Personalized outreach drafts
-- Recruitment pipeline
-- Organization accounts
-- Analytics
+- Use semantic HTML and concise accessible labels.
+- Show visible focus styles and preserve keyboard navigation.
+- Provide a mobile navigation pattern and no horizontally inaccessible controls.
+- Use consistent spacing, light surfaces, muted borders, and restrained color.
+- Avoid unsupported AI-accuracy claims.
+- Add loading, empty, and error states before real API integration.
 
-## Security
+## Data and multi-tenancy
 
-- No unauthorized LinkedIn scraping.
-- No automated LinkedIn invitations or messages.
-- Never expose API keys.
-- No real candidate data during development.
-- Protect each organization's information.
-- Human review of candidate assessments.
+- Define consistent User, Organization, Membership, Candidate, Experience, Skill, Note, Source, Campaign, Outreach, Pipeline Stage, Activity, and Analytics types.
+- Organizations own their candidate and campaign records.
+- Future database queries must always scope by organization membership.
+- Authentication must not be the only trust boundary; authorization must be enforced by server-side queries and row-level security.
+- No real candidate data is allowed during development.
+
+## Security and privacy
+
+- Never commit `.env` files, credentials, API keys, tokens, or private candidate records.
+- Do not implement unauthorized LinkedIn scraping.
+- Do not send automated connection requests or unsolicited automated messages.
+- AI output must include evidence and require human review.
+- Minimize personal candidate fields and support deletion/export requirements later.
+
+## Error handling
+
+- Prevent invalid form submissions.
+- Preserve usable page state when filtering or selecting records.
+- Surface validation and server errors near the relevant action.
+- Never log secrets or sensitive candidate data.
+
+## Git workflow
+
+- Inspect status and diffs before editing and committing.
+- Use `main` as the primary branch.
+- Never force-push or overwrite an existing remote repository.
+- Commit complete, validated work with useful messages.
+- Include `Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>` on commits.
+
+## Backend readiness
+
+- Keep UI components independent of database libraries.
+- Centralize future data access behind typed repository functions.
+- Do not introduce authentication, AI APIs, or Supabase until frontend behavior and data models are stable.
+- Use server-only code for secrets and privileged operations.
