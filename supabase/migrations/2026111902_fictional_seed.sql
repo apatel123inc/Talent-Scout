@@ -5,22 +5,23 @@ set name = excluded.name,
     region = excluded.region,
     website = excluded.website;
 
-insert into public.pipeline_stages (organization_id, name, sort_order, is_terminal)
+insert into public.pipeline_stages (organization_id, stage_key, name, sort_order, is_terminal)
 values
-  ('11111111-1111-4111-8111-111111111111', 'Discovered', 10, false),
-  ('11111111-1111-4111-8111-111111111111', 'Under Review', 20, false),
-  ('11111111-1111-4111-8111-111111111111', 'Approved for Outreach', 30, false),
-  ('11111111-1111-4111-8111-111111111111', 'Contacted', 40, false),
-  ('11111111-1111-4111-8111-111111111111', 'Responded', 50, false),
-  ('11111111-1111-4111-8111-111111111111', 'Interested', 60, false),
-  ('11111111-1111-4111-8111-111111111111', 'Application', 70, false),
-  ('11111111-1111-4111-8111-111111111111', 'Interview', 80, false),
-  ('11111111-1111-4111-8111-111111111111', 'Selected', 90, true),
-  ('11111111-1111-4111-8111-111111111111', 'Rejected', 100, true),
-  ('11111111-1111-4111-8111-111111111111', 'Archived', 110, true),
-  ('11111111-1111-4111-8111-111111111111', 'Chapter Launched', 120, true)
-on conflict (organization_id, name) do update
-set sort_order = excluded.sort_order,
+  ('11111111-1111-4111-8111-111111111111', 'discovered', 'Discovered', 10, false),
+  ('11111111-1111-4111-8111-111111111111', 'under-review', 'Under Review', 20, false),
+  ('11111111-1111-4111-8111-111111111111', 'approved-for-outreach', 'Approved for Outreach', 30, false),
+  ('11111111-1111-4111-8111-111111111111', 'contacted', 'Contacted', 40, false),
+  ('11111111-1111-4111-8111-111111111111', 'responded', 'Responded', 50, false),
+  ('11111111-1111-4111-8111-111111111111', 'interested', 'Interested', 60, false),
+  ('11111111-1111-4111-8111-111111111111', 'application', 'Application', 70, false),
+  ('11111111-1111-4111-8111-111111111111', 'interview', 'Interview', 80, false),
+  ('11111111-1111-4111-8111-111111111111', 'selected', 'Selected', 90, true),
+  ('11111111-1111-4111-8111-111111111111', 'rejected', 'Rejected', 100, true),
+  ('11111111-1111-4111-8111-111111111111', 'archived', 'Archived', 110, true),
+  ('11111111-1111-4111-8111-111111111111', 'chapter-launched', 'Chapter Launched', 120, true)
+on conflict (organization_id, stage_key) do update
+set name = excluded.name,
+    sort_order = excluded.sort_order,
     is_terminal = excluded.is_terminal;
 
 insert into public.campaigns (id, organization_id, name, position, description, status, start_date)
@@ -64,10 +65,12 @@ set organization_id = excluded.organization_id,
     match_score = excluded.match_score,
     review_status = excluded.review_status;
 
+-- Seeded campaign-candidate relationships intentionally create no duplicate rows.
+-- Their trigger creates the initial pipeline entry only on a new relationship.
 insert into public.campaign_candidates (id, organization_id, campaign_id, candidate_id)
 values
   ('41111111-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111', '21111111-1111-4111-8111-111111111111', '31111111-1111-4111-8111-111111111111'),
   ('42222222-2222-4222-8222-222222222222', '11111111-1111-4111-8111-111111111111', '21111111-1111-4111-8111-111111111111', '32222222-2222-4222-8222-222222222222'),
   ('43333333-3333-4333-8333-333333333333', '11111111-1111-4111-8111-111111111111', '21111111-1111-4111-8111-111111111111', '33333333-3333-4333-8333-333333333333'),
   ('44444444-4444-4444-8444-444444444444', '11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222', '35555555-5555-4555-8555-555555555555')
-on conflict (id) do nothing;
+on conflict (campaign_id, candidate_id) do nothing;

@@ -78,6 +78,10 @@ create table public.candidates (
   unique (id, organization_id)
 );
 
+comment on column public.candidates.match_score is 'Temporary fictional prototype/demo data only. It is not a validated recruitment assessment and must not be used for real candidate decisions.';
+
+comment on column public.candidates.review_status is 'Temporary fictional prototype status only. Real evaluations require an evidence-backed review workflow.';
+
 create table public.campaign_candidates (
   id uuid primary key default gen_random_uuid(),
   organization_id uuid not null,
@@ -100,11 +104,13 @@ create table public.campaign_candidates (
 create table public.pipeline_stages (
   id uuid primary key default gen_random_uuid(),
   organization_id uuid not null references public.organizations (id) on delete cascade,
+  stage_key text not null check (stage_key ~ '^[a-z0-9]+(?:-[a-z0-9]+)*$'),
   name text not null check (btrim(name) <> ''),
   sort_order integer not null check (sort_order >= 0),
   is_terminal boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
+  unique (organization_id, stage_key),
   unique (organization_id, name),
   unique (organization_id, sort_order),
   unique (id, organization_id)
@@ -178,7 +184,7 @@ begin
   select id into discovered_stage_id
   from public.pipeline_stages
   where organization_id = new.organization_id
-    and name = 'Discovered'
+    and stage_key = 'discovered'
   limit 1;
 
   if discovered_stage_id is null then
@@ -241,6 +247,88 @@ $$;
 create trigger candidate_pipeline_history_protected
 before update or delete on public.candidate_pipeline_entries
 for each row execute function public.prevent_pipeline_history_mutation();
+
+create or replace function public.move_campaign_candidate_stage(
+  p_campaign_candidate_id uuid,
+  p_pipeline_stage_id uuid,
+  p_changed_by uuid default null,
+  p_note text default null
+)
+returns uuid
+language plpgsql
+security invoker
+set search_path = public
+as $$
+declare
+  v_organization_id uuid;
+  v_stage_organization_id uuid;
+  v_current_entry_id uuid;
+begin
+  select cc.organization_id
+    into v_organization_id
+  from public.campaign_candidates cc
+  where cc.id = p_campaign_candidate_id;
+
+  if v_organization_id is null then
+    raise exception 'Campaign-candidate relationship not found';
+  end if;
+
+  select ps.organization_id
+    into v_stage_organization_id
+  from public.pipeline_stages ps
+  where ps.id = p_pipeline_stage_id;
+
+  if v_stage_organization_id is null then
+    raise exception 'Pipeline stage not found';
+  end if;
+
+  if v_stage_organization_id is distinct from v_organization_id then
+    raise exception 'Pipeline stage belongs to a different organization';
+  end if;
+
+  if p_changed_by is not null then
+    if not exists (select 1 from public.users u where u.id = p_changed_by) then
+      raise exception 'Changed-by user not found';
+    end if;
+  end if;
+
+  select cpe.id
+    into v_current_entry_id
+  from public.candidate_pipeline_entries cpe
+  where cpe.campaign_candidate_id = p_campaign_candidate_id
+    and cpe.exited_at is null
+  for update;
+
+  if v_current_entry_id is not null then
+    update public.candidate_pipeline_entries cpe
+    set exited_at = now()
+    where cpe.id = v_current_entry_id
+      and cpe.exited_at is null;
+  end if;
+
+  insert into public.candidate_pipeline_entries (
+    organization_id,
+    campaign_candidate_id,
+    pipeline_stage_id,
+    entered_at,
+    changed_by,
+    note
+  ) values (
+    v_organization_id,
+    p_campaign_candidate_id,
+    p_pipeline_stage_id,
+    now(),
+    p_changed_by,
+    p_note
+  )
+  returning id into v_current_entry_id;
+
+  return v_current_entry_id;
+end;
+$$;
+
+comment on function public.move_campaign_candidate_stage(uuid, uuid, uuid, text) is
+'Controlled transactional pipeline movement. The function closes the current stage and creates the next stage atomically.';
 
 alter table public.organizations enable row level security;
 alter table public.users enable row level security;
