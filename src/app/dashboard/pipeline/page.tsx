@@ -1,12 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { candidates as initialCandidates, pipelineStages, type Candidate, type CandidateStatus } from "@/data/dashboard-data";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export default function PipelinePage() {
   const [candidates, setCandidates] = useState(initialCandidates);
+  const [relations, setRelations] = useState<Record<string, string>>({});
+  const [stageIds, setStageIds] = useState<Record<string, string>>({});
 
-  function moveCandidate(id: number, status: CandidateStatus) {
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+
+    supabase
+      .from("pipeline_stages")
+      .select("id, name, stage_key")
+      .then(({ data }) => {
+        const map: Record<string, string> = {};
+        (data ?? []).forEach((stage) => { map[stage.name] = stage.id; });
+        setStageIds(map);
+      });
+
+    supabase
+      .from("campaign_candidates")
+      .select("id, candidate_id")
+      .then(({ data }) => {
+        const map: Record<string, string> = {};
+        (data ?? []).forEach((relation) => { map[relation.candidate_id] = relation.id; });
+        setRelations(map);
+      });
+  }, []);
+
+  async function moveCandidate(id: string, status: CandidateStatus) {
+    const supabase = createSupabaseBrowserClient();
+    const stageId = stageIds[status];
+    const relationId = relations[id];
+
+    if (stageId && relationId) {
+      const { error } = await supabase.rpc("move_campaign_candidate_stage", {
+        p_campaign_candidate_id: relationId,
+        p_pipeline_stage_id: stageId,
+        p_note: `Moved to ${status}`,
+      });
+      if (error) return;
+    }
+
     setCandidates((current) => current.map((candidate) => candidate.id === id ? { ...candidate, status } : candidate));
   }
 

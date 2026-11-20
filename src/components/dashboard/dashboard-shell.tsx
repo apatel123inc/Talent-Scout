@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
+import { logout } from "@/app/actions/auth";
 import { BellIcon, ChartIcon, GridIcon, MegaphoneIcon, MenuIcon, PipelineIcon, SearchIcon, SettingsIcon, UsersIcon } from "./dashboard-icons";
 
 const navigation = [
@@ -46,10 +47,11 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
           <h1 className="w-32 text-base font-bold sm:w-44 sm:text-lg">{current.label}</h1>
           <div className="ml-auto hidden max-w-md flex-1 md:block"><label className="relative block"><span className="sr-only">Search the dashboard</span><SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /><input type="search" placeholder="Search candidates, campaigns..." className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 pr-4 text-sm outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100" /></label></div>
           <button type="button" className="relative grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50" aria-label="Notifications"><BellIcon className="h-5 w-5" /><span className="absolute right-2 top-2 h-2 w-2 rounded-full border-2 border-white bg-indigo-600" /></button>
-          <div className="flex h-10 items-center gap-2" aria-label="Demo user">
+          <form action={logout} className="flex h-10 items-center gap-2" aria-label="Current user">
             <span className="grid h-8 w-8 place-items-center rounded-full bg-violet-100 text-xs font-bold text-violet-700">AP</span>
-            <span className="hidden text-left sm:block"><span className="block text-xs font-bold">Aatman Patel</span><span className="block text-[10px] text-slate-400">Demo workspace</span></span>
-          </div>
+            <span className="hidden text-left sm:block"><span className="block text-xs font-bold">Aatman Patel</span><span className="block text-[10px] text-slate-400">TalentScout workspace</span></span>
+            <button type="submit" className="h-8 rounded-lg border border-slate-200 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Sign out</button>
+          </form>
         </header>
         <main className="mx-auto max-w-[1500px] p-4 sm:p-6 lg:p-8">{children}</main>
       </div>

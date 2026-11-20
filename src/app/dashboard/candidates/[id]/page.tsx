@@ -9,7 +9,7 @@ export function generateStaticParams() {
 
 export default async function CandidateDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const candidate = candidates.find((item) => item.id === Number(id));
+  const candidate = candidates.find((item) => item.id === id);
 
   if (!candidate) notFound();
 

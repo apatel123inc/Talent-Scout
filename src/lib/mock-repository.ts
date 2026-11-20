@@ -14,7 +14,7 @@ import {
 
 export const mockRepository = {
   listCandidates: (): Candidate[] => candidates,
-  findCandidate: (id: number): Candidate | undefined => candidates.find((candidate) => candidate.id === id),
+  findCandidate: (id: string): Candidate | undefined => candidates.find((candidate) => candidate.id === id),
   searchCandidates: (query: string, status: "All statuses" | CandidateStatus = "All statuses"): Candidate[] => {
     const normalized = query.trim().toLowerCase();
     return candidates.filter((candidate) => {
@@ -25,7 +25,7 @@ export const mockRepository = {
       return searchable.includes(normalized) && (status === "All statuses" || candidate.status === status);
     });
   },
-  moveCandidate: (candidateId: number, status: CandidateStatus): Candidate | undefined => {
+  moveCandidate: (candidateId: string, status: CandidateStatus): Candidate | undefined => {
     const candidate = candidates.find((item) => item.id === candidateId);
     return candidate ? { ...candidate, status } : undefined;
   },
@@ -33,7 +33,7 @@ export const mockRepository = {
   listOrganizations: (): Organization[] => organizations,
   listPipelineStages: (): CandidateStatus[] => pipelineStages,
   listActivity: () => recentActivity,
-  listOutreach: (candidateId?: number): OutreachMessage[] => candidateId
+  listOutreach: (candidateId?: string): OutreachMessage[] => candidateId
     ? outreachMessages.filter((message) => message.candidateId === candidateId)
     : outreachMessages,
 };
